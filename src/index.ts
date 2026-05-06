@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { spawn } from 'child_process';
+import path from 'path';
 import { render } from 'ink';
 import React from 'react';
 import { Command } from 'commander';
@@ -104,9 +105,20 @@ async function main(claudeArgs: string[], cliOverride?: string): Promise<void> {
   // Priority: --cli option > CC_CLI_PATH env var > 'claude' default
   const claudeBin = cliOverride || process.env.CC_CLI_PATH || 'claude';
 
+  // Strip volta-injected paths from PATH to avoid spawning older claude version
+  // Volta injects paths like ~/.volta/tools/image/node/<version>/bin at PATH head
+  const cleanPath = process.env.PATH
+    ?.split(path.delimiter)
+    .filter((p) => !p.includes('/.volta/tools/image/'))
+    .join(path.delimiter);
+
   const child = spawn(claudeBin, finalArgs, {
     stdio: 'inherit',
     shell: process.platform === 'win32',
+    env: {
+      ...process.env,
+      ...(cleanPath && { PATH: cleanPath }),
+    },
   });
 
   child.on('error', (err) => {

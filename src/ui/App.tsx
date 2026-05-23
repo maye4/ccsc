@@ -64,10 +64,9 @@ function ProviderPreview({ provider }: ProviderPreviewProps) {
 
 interface AppProps {
   providers: Provider[];
-  onSelect: (provider: Provider) => void;
 }
 
-export function App({ providers, onSelect }: AppProps) {
+export function App({ providers }: AppProps) {
   const { exit } = useApp();
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -98,10 +97,9 @@ export function App({ providers, onSelect }: AppProps) {
   // Handle selection
   const handleSelect = useCallback(
     (provider: Provider) => {
-      onSelect(provider);
-      exit();
+      exit(provider);
     },
-    [onSelect, exit]
+    [exit]
   );
 
   // Keyboard navigation
@@ -126,7 +124,6 @@ export function App({ providers, onSelect }: AppProps) {
           handleSelect(selectedProvider);
         } else if (key.escape) {
           exit();
-          process.exit(0);
         }
       },
       [filteredProviders.length, selectedProvider, pageSize, handleSelect, exit]
